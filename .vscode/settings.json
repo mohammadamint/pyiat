@@ -1,0 +1,18 @@
+{
+    "code-runner.cwd": "/Users/mohammadamintahavori/Documents/GitHub/pyiat",
+    "code-runner.preserveFocus": false,
+    "python.defaultInterpreterPath": "Users/mohammadamintahavori/opt/anaconda3/bin/python",
+    "files.trimTrailingWhitespace": true,
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": false,
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "88"
+    ],
+    "jupyter.notebookFileRoot": "${workspaceFolder}",
+    "jupyter.interactiveWindowMode": "single",
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": false,
+    "python.testing.pytestEnabled": true,
+
+}
