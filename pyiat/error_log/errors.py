@@ -9,3 +9,6 @@ class WrongFormat(Exception):
 
 class MissingData(Exception):
     """raises when a piece of data is missed for the further calculations"""
+
+class NotImplementable(Exception):
+    """raises when an operation can not be implemented"""

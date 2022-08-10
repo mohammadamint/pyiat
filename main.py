@@ -79,6 +79,11 @@ physical_capital = Capital("Physical Capital",dimensions=[HeavyInfrastructure,Li
 
 impact = Impact("Total Impact",[natural_capital,physical_capital])
 
+#%%
+#impact.weight_matrices_to_excel("files")
+#%%
+#impact.parse_weight_matrices_from_excel("files")
+#%%
 for item in [Water,Air,natural_capital,HeavyInfrastructure,LightInfrastructure,physical_capital,impact]:
     df = item.get_weight_matrix()
     df.iloc[0] = 2
@@ -87,5 +92,10 @@ for item in [Water,Air,natural_capital,HeavyInfrastructure,LightInfrastructure,p
 # %%
 from pyiat.utils.io import excel_parser
 
-output = excel_parser("Book1.xlsx")
+output = excel_parser("files/Book1.xlsx")
+# %%
+impact = output.impact
+impact.parse_weight_matrices_from_excel("files")
+# %%
+impact.score
 # %%

@@ -1,12 +1,12 @@
 from pyiat.utils.constants import INDICATORS, EFFECT, POSITIVE, NEGATIVE
 from pyiat.error_log.errors import InvalidInput, WrongFormat, MissingData
 from pyiat.utils.constants import Constant
-from pyiat.utils.tools import get_combination, geometric_mean
+from pyiat.utils.tools import get_combination, geometric_mean,evaluation_guide
 from pyiat.core.plots import Plots
 import pandas as pd
 import numpy as np
 import copy
-from typing import List
+from typing import Dict, List, Union
 
 OBJ_MAP = {"Impact": "capitals", "Capital": "dimensions", "Dimension": "indicators"}
 
@@ -97,11 +97,11 @@ class PairWised:
             columns=self.pairwised_items,
         )
 
-        if not df.index.equals(matrix.index):
-            raise WrongFormat(
-                "matrix does not have the correct format. please use the get_weight_matrix function to get the correct format."
-            )
-
+        # print(df)
+        # if not df.index.equals(matrix.index):
+        #     raise WrongFormat(
+        #         f"matrix does not have the correct format. please use the get_weight_matrix function to get the correct format. Object -> {self}"
+        #     )
         for raw, val in matrix.items():
             df.loc[raw[0], raw[1]] = val
             df.loc[raw[1], raw[0]] = 1 / val
@@ -123,7 +123,7 @@ class PairWised:
         """
         if not hasattr(self, "weight_matrix"):
             raise MissingData(
-                "weights are not assigned. set_weight_matrix function can be used for assinging the matrix."
+                f"weights are not assigned for object '{self}'. set_weight_matrix function can be used for assinging the matrix."
             )
 
         geo_mean = geometric_mean(self.weight_matrix)
@@ -175,13 +175,14 @@ class PairWised:
     def __iter__(self):
         pairwised = "_" + OBJ_MAP[self.id]
         self.__it__ = copy.deepcopy(getattr(self, pairwised))
+        self.__pairwised__ = pairwised
         return self
 
     def __next__(self):
         """generating an iterator over the scenarios"""
         if len(self.__it__):
             key = [*self.__it__][0]
-            value = self.__it__[key]
+            value = getattr(self,self.__pairwised__)[key]
 
             self.__it__.pop(key)
 
@@ -506,3 +507,102 @@ class Impact(PairWised):
 
         df = pd.DataFrame(vals, columns=headers)
         return df.set_index(headers[0:3])
+
+
+    @property
+    def capitals_score(self) -> pd.DataFrame:
+        """returns the concated capital scores of the project
+
+        Returns
+        -------
+        pd.DataFrame
+            concated capital scores
+        """
+        return pd.concat([capital.score for name, capital in self], axis=1)
+
+
+
+    def weight_matrices_to_excel(self,path:Union[str,None]) -> Union[None,Dict]:
+        """writes all the weight matrices into a series of excel files
+
+        Parameters
+        ----------
+        path : Union[str,None]
+            str of the file directory, if None, will return a dict similar to the structure of the files
+
+        Returns
+        -------
+        Union[None,Dict]
+            if str is passed to path, will save the excel files otherwise returns a dict
+        """
+
+        files = {
+            "Impact":{},
+            "Capital" : {},
+            "Dimension": {},
+        }
+
+
+        files["Impact"]["impacts"] = self.get_weight_matrix()
+
+        for capital_name,capital in self:
+            files["Capital"][capital_name] = capital.get_weight_matrix()
+
+            for dimension_name,dimension in capital:
+                files["Dimension"][dimension_name] = dimension.get_weight_matrix()
+
+        if path == None:
+            return files
+
+        for item,vals in files.items():
+            guide = evaluation_guide(item)
+            with pd.ExcelWriter(f'{path}/{item}.xlsx') as file:
+                guide.to_excel(file,"Evaluation Guide")
+                for sheet,df in vals.items():
+                    df.to_excel(file,sheet)
+
+
+    def parse_weight_matrices(self,io:Union[str,Dict]) -> None:
+        """parses weight matrices from an excel file or a dictionary
+
+        Parameters
+        ----------
+        io : Union[str,Dict]
+            file path as a string or the files dictionary
+
+        Raises
+        ------
+        InvalidInput
+            if nans exists in the dataframes/excel sheets.
+        """
+        sample = self.weight_matrices_to_excel(path=None)
+
+        if io == None:
+            files = io
+
+        else:
+            files = sample.copy()
+
+            for item,vals in files.items():
+                for sheet,df in vals.items():
+                    data = pd.read_excel(
+                        f"{io}/{item}.xlsx",
+                        sheet_name=sheet,
+                        index_col=[0,1]
+                        )
+
+                    if data.isnull().any().sum():
+                        raise InvalidInput(f"NaN values are not acceptable for weights. File -> '{io}/{item}.xlsx', sheet -> {sheet}.")
+
+                    files[item][sheet] = data.iloc[:,0]
+
+        self.set_weight_matrix(files["Impact"]["impacts"])
+
+        for capital_name,capital in self:
+            capital.set_weight_matrix(files["Capital"][capital_name])
+            for dimension_name,dimension in capital:
+                dimension.set_weight_matrix(files["Dimension"][dimension_name])
+
+
+
+
