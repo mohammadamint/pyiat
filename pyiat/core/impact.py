@@ -191,6 +191,8 @@ class PairWised:
         else:
             raise StopIteration
 
+    def copy(self):
+        return copy.deepcopy(self)
 
 class Indicator:
     """an object for buidling indicators
@@ -229,7 +231,7 @@ class Indicator:
     @type.setter
     def type(self, var):
         if var not in INDICATORS.type:
-            InvalidInput(f"Valid inputs for type are {INDICATORS.type}")
+            raise InvalidInput(f"Valid inputs for type are {INDICATORS.type}")
         self._type = var
 
     @property
@@ -239,7 +241,7 @@ class Indicator:
     @ex_ante.setter
     def ex_ante(self, var):
         if var not in INDICATORS.ex_ante:
-            InvalidInput(f"Valid inputs for ex_ante are {INDICATORS.ex_ante}")
+            raise InvalidInput(f"Valid inputs for ex_ante are {INDICATORS.ex_ante}")
         self._ex_ante = var
 
     @property
@@ -249,7 +251,7 @@ class Indicator:
     @ex_post.setter
     def ex_post(self, var):
         if var not in INDICATORS.ex_post:
-            InvalidInput(f"Valid inputs for ex_post are {INDICATORS.ex_post}")
+            raise InvalidInput(f"Valid inputs for ex_post are {INDICATORS.ex_post}")
         self._ex_post = var
 
     @property
@@ -289,6 +291,8 @@ class Indicator:
     def __repr__(self) -> str:
         return "Indicator" + ":" + self.name
 
+    def copy(self):
+        return copy.deepcopy(self)
 
 class Dimension(PairWised):
     """the main class for Dimensions

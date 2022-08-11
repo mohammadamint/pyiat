@@ -3,6 +3,7 @@ from pyiat.core.impact import Indicator,Dimension,Capital,Impact
 # Water
 water_depleted = Indicator(
     name = "depleted water",
+
     type = "negative",
     unit = "m3",
     ex_ante = 1,
@@ -90,12 +91,18 @@ for item in [Water,Air,natural_capital,HeavyInfrastructure,LightInfrastructure,p
     item.set_weight_matrix(df)
 
 # %%
-from pyiat.utils.io import excel_parser
+from pyiat import excel_parser
 
 output = excel_parser("files/Book1.xlsx")
 # %%
 impact = output.impact
-impact.parse_weight_matrices_from_excel("files")
+impact.parse_weight_matrices("files")
 # %%
-impact.score
+impact.capitals_score
+# %%
+impact.plots.detailed_scores_chart()
+# %%
+output.capitals["Natural Capital"].plots.detailed_scores_chart("radar")
+# %%
+impact.plots.detailed_scores_chart("radar")
 # %%

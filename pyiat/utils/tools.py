@@ -26,23 +26,23 @@ def get_combination(array: List) -> List:
     return combination
 
 
-def reverse_series(series: pd.Series) -> pd.Series:
-    """returns the a series similar to the input with reversed values for counter values
+# def reverse_series(series: pd.Series) -> pd.Series:
+#     """returns the a series similar to the input with reversed values for counter values
 
-    Parameters
-    ----------
-    series : pd.Series
-        the original series
+#     Parameters
+#     ----------
+#     series : pd.Series
+#         the original series
 
-    Returns
-    -------
-    pd.Series
-        the reversed counter items
-    """
-    output = pd.Series(dtype=series.dtype)
+#     Returns
+#     -------
+#     pd.Series
+#         the reversed counter items
+#     """
+#     output = pd.Series(dtype=series.dtype)
 
-    for row, val in series.iteritems():
-        output.loc[row[1], row[0]] = 1 / val
+#     for row, val in series.iteritems():
+#         output.loc[row[1], row[0]] = 1 / val
 
 
 def geometric_mean(frame: pd.DataFrame) -> pd.Series:
